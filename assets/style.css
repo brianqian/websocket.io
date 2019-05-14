@@ -1,0 +1,51 @@
+body,
+html {
+  margin: 0;
+  box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
+div {
+  border: 1px solid black;
+}
+
+.chatbox {
+  height: 100vh;
+  width: 100vw;
+  display: grid;
+}
+
+.display-area {
+  display: flex;
+  height: 90vh;
+  width: 100vw;
+}
+
+.display-text {
+  width: 80vw;
+  height: 100%;
+}
+
+.display-users {
+  width: 20vw;
+  height: 100%;
+}
+
+.text-entry {
+  width: 100vw;
+  height: 100%;
+  display: flex;
+}
+
+.text-entry input {
+  flex: 8;
+}
+
+.text-entry button {
+  flex: 2;
+}
