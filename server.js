@@ -12,17 +12,24 @@ app.get("/", (req, res) => {
 });
 
 io.on("connection", socket => {
-  console.log("a user connected");
+  const activeUsers = {};
+
+  console.log("a user connected", `socketID: ${socket.id}`);
   socket.on("chat message", message => {
     console.log(`message: ${message}`);
     io.emit("message", message);
   });
   socket.on("new user", username => {
-    console.log(`new user ${username} has joined`);
-    io.emit("new user", username);
+    console.log(`new user ${username} has joined. socketID: ${socket.id}`);
+    io.emit("generate current users", activeUsers);
+    io.emit("new user", { username, id: socket.id });
+    activeUsers[socket.id] = username;
+    console.log(activeUsers);
   });
   socket.on("disconnect", reason => {
-    console.log("user disconnected: " + msg);
+    console.log("user disconnected: " + reason);
+    io.emit("user disconnected", socket.id);
+    delete activeUsers[socket.id];
   });
 });
 

@@ -35,14 +35,27 @@ socket.on("message", msg => {
   chatbox.append(newDiv);
 });
 
-socket.on("new user", username => {
-  console.log("new user:" + username);
+//new user
+socket.on("new user", user => {
+  console.log("new user:" + user.username);
   const userList = document.querySelector(".display-users");
   const newDiv = document.createElement("div");
-  newDiv.textContent = username;
+  newDiv.textContent = user.username;
+  newDiv.id = user.id;
   userList.append(newDiv);
 });
 
-socket.on("disconnect", () => {
-  socket.emit("disconnect", "test");
+socket.on("generate current users", usersObj => {
+  console.log(usersObj);
+  const userList = document.querySelector(".display-users");
+  for (const user in usersObj) {
+    const newDiv = document.createElement("div");
+    newDiv.id = user.id;
+    newDiv.textContent = user.username;
+    userList.append(newDiv);
+  }
+});
+
+socket.on("user disconnected", id => {
+  document.getElementById(id).remove();
 });
