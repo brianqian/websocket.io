@@ -15,9 +15,14 @@ io.on("connection", socket => {
   console.log("a user connected");
   socket.on("chat message", message => {
     console.log(`message: ${message}`);
+    io.emit("message", message);
   });
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
+  socket.on("new user", username => {
+    console.log(`new user ${username} has joined`);
+    io.emit("new user", username);
+  });
+  socket.on("disconnect", reason => {
+    console.log("user disconnected: " + msg);
   });
 });
 

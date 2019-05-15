@@ -11,13 +11,24 @@
 
   <body>
     <div class="chatbox">
-      <div class="display-area">
-        <div class="display-text"></div>
-        <div class="display-users"></div>
+      <div class="register-username">
+        <form class="username-form" action="submit">
+          <label for="enter-username">
+            Nickname:
+            <input type="text" id="enter-username" />
+          </label>
+          <button type="submit">Join Chat</button>
+        </form>
       </div>
-
+      <div class="display-area">
+        <div class="display-chat"></div>
+        <div class="display-users">
+          <h3>Users</h3>
+        </div>
+      </div>
+      <div class="status-bar">brian is typing</div>
       <form class="text-entry" action="submit">
-        <input type="text" />
+        <input class="text-entry" type="text" />
         <button type="submit">Send</button>
       </form>
     </div>
