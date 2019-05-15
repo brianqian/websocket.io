@@ -1,6 +1,17 @@
 const socket = io();
 let username = "";
+let userId = "";
+
 const forms = document.querySelectorAll("form");
+
+const addToDiv = (divClass, message, className, id) => {
+  const container = document.querySelector(divClass);
+  const newDiv = document.createElement("div");
+  newDiv.textContent = message;
+  if (id) newDiv.id = id;
+  if (className) newDiv.classList.add(className);
+  container.append(newDiv);
+};
 
 forms.forEach(form =>
   form.addEventListener("submit", e => {
@@ -27,22 +38,29 @@ function handleChatSubmit() {
 }
 
 //displays message when submitted
+//receiving message
 socket.on("message", msg => {
-  console.log("msg: " + msg);
-  const chatbox = document.querySelector(".display-chat");
-  const newDiv = document.createElement("div");
-  newDiv.textContent = `${msg.username}: ${msg.message}`;
-  chatbox.append(newDiv);
+  addToDiv(".display-chat", `${msg.username}: ${msg.message}`);
 });
 
-//new user
+//new user has joined
 socket.on("new user", user => {
   console.log("new user:" + user.username);
-  const userList = document.querySelector(".display-users");
-  const newDiv = document.createElement("div");
-  newDiv.textContent = user.username;
-  newDiv.id = user.id;
-  userList.append(newDiv);
+  const { username, id } = user;
+  //display new user in userList
+  // addToDiv(".display-users", username, null, id);
+  //announce new user in chat
+  addToDiv(".display-chat", `${username} has joined the chat.`);
+  //send username/id to server
+});
+
+socket.on("load other users", activeUsers => {
+  //populate other users
+  document.querySelectorAll(".display-users div").forEach(user => user.remove());
+  for (const userId in activeUsers) {
+    // if (!document.getElementById(userId)) continue;
+    addToDiv(".display-users", activeUsers[userId], null, userId);
+  }
 });
 
 socket.on("generate current users", usersObj => {
@@ -57,5 +75,8 @@ socket.on("generate current users", usersObj => {
 });
 
 socket.on("user disconnected", id => {
+  //removes user from userList
   document.getElementById(id).remove();
+  //announces left the chat
+  addToDiv(".display-chat", `${username} has left the chat`);
 });

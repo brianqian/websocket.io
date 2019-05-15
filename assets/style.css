@@ -86,4 +86,5 @@ div {
 .status-bar {
   height: 3vh;
   width: 100%;
+  background-color: gray;
 }

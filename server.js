@@ -11,23 +11,30 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-io.on("connection", socket => {
-  const activeUsers = {};
+const activeUsers = {};
 
+io.on("connection", socket => {
+  //when receiving a message, relay message to other people
   console.log("a user connected", `socketID: ${socket.id}`);
   socket.on("chat message", message => {
     console.log(`message: ${message}`);
     io.emit("message", message);
   });
+
+  //after registering a nickname, populate other user lists
+  //announce user entering channel
   socket.on("new user", username => {
     console.log(`new user ${username} has joined. socketID: ${socket.id}`);
-    io.emit("generate current users", activeUsers);
-    io.emit("new user", { username, id: socket.id });
     activeUsers[socket.id] = username;
+    io.emit("new user", { username, id: socket.id });
+    io.emit("load other users", activeUsers);
     console.log(activeUsers);
   });
+
+  //when disconnecting, let other users know.
   socket.on("disconnect", reason => {
     console.log("user disconnected: " + reason);
+    //removes user from userList
     io.emit("user disconnected", socket.id);
     delete activeUsers[socket.id];
   });
