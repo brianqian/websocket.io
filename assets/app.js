@@ -22,20 +22,28 @@ forms.forEach(form =>
 );
 
 //creates username
-function createUsername() {
+const createUsername = () => {
   const usernameForm = document.getElementById("enter-username");
   socket.emit("new user", usernameForm.value);
   username = usernameForm.value;
   const formOverlay = document.querySelector(".register-username");
   formOverlay.style.display = "none";
-}
+  //shows username in statusbar
+  addToDiv(".status-bar", `Signed in as ${username}`, null, "statusbar__current-user");
+  document.getElementById("statusbar__current-user").style.cssText =
+    "justify-self: flex-end; width: 200px";
+};
+
+const chatEntry = document.querySelector("input.text-entry");
+chatEntry.addEventListener("keydown", () => {
+  socket.emit(chatEntry.value.length > 0 ? "typing" : "end typing");
+});
 
 //submits chat message to socket server
-function handleChatSubmit() {
-  const input = document.querySelector("input.text-entry");
-  socket.emit("chat message", { username, message: input.value });
-  input.value = "";
-}
+const handleChatSubmit = () => {
+  socket.emit("chat message", { username, message: chatEntry.value });
+  chatEntry.value = "";
+};
 
 //displays message when submitted
 //receiving message
@@ -45,7 +53,6 @@ socket.on("message", msg => {
 
 //new user has joined
 socket.on("new user", user => {
-  console.log("new user:" + user.username);
   const { username, id } = user;
   //display new user in userList
   // addToDiv(".display-users", username, null, id);
@@ -54,18 +61,17 @@ socket.on("new user", user => {
   //send username/id to server
 });
 
-socket.on("load other users", activeUsers => {
+socket.on("load user list", activeUsers => {
   //populate other users
-  document.querySelectorAll(".display-users div").forEach(user => user.remove());
+  document.querySelectorAll(".userlist div").forEach(user => user.remove());
   for (const userId in activeUsers) {
     // if (!document.getElementById(userId)) continue;
-    addToDiv(".display-users", activeUsers[userId], null, userId);
+    addToDiv(".userlist", activeUsers[userId], "userlist__name", userId);
   }
 });
 
 socket.on("generate current users", usersObj => {
-  console.log(usersObj);
-  const userList = document.querySelector(".display-users");
+  const userList = document.querySelector(".userlist");
   for (const user in usersObj) {
     const newDiv = document.createElement("div");
     newDiv.id = user.id;

@@ -27,7 +27,7 @@ io.on("connection", socket => {
     console.log(`new user ${username} has joined. socketID: ${socket.id}`);
     activeUsers[socket.id] = username;
     io.emit("new user", { username, id: socket.id });
-    io.emit("load other users", activeUsers);
+    io.emit("load user list", activeUsers);
     console.log(activeUsers);
   });
 
