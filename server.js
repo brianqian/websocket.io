@@ -6,7 +6,7 @@ var io = require("socket.io")(http);
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static("/src"));
+app.use(express.static("src"));
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/src/index.html");
 });

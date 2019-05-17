@@ -1,3 +1,5 @@
+import "./style.scss";
+
 const socket = io();
 let username = "";
 let userId = "";

@@ -10,6 +10,14 @@ Websocket.io uses Socket.io to take advantage of the Websocket API. Socket.io en
 >
 > This means that the server can push messages to clients. Whenever you write a chat message, the idea is that the server will get it and push it to all other connected clients.
 
+## Built With
+
+- HTML/SCSS
+- Babel/Webpack
+- Javascript
+- Socket.io
+- Node/Express
+
 ## Features
 
 - Real-time chat between multiple users
