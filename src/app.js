@@ -1,17 +1,20 @@
-import "./style.scss";
+// import "./style.scss";
 
 const socket = io();
 let username = "";
 let userId = "";
+let typing = false;
+let lastMsgTime = new Date(1999);
+const chatEntry = document.querySelector("input.text-entry");
 
 const forms = document.querySelectorAll("form");
 
 const addToDiv = (divClass, message, className, id) => {
   const container = document.querySelector(divClass);
   const newDiv = document.createElement("div");
-  newDiv.textContent = message;
-  if (id) newDiv.id = id;
-  if (className) newDiv.classList.add(className);
+  if (message !== null) newDiv.textContent = message;
+  if (id && id !== null) newDiv.id = id;
+  if (className && className !== null) newDiv.classList.add(className);
   container.append(newDiv);
 };
 
@@ -22,6 +25,10 @@ forms.forEach(form =>
     if (e.target.classList.contains("username-form")) createUsername();
   })
 );
+
+/***********************
+ * CREATE NEW USER
+ ***********************/
 
 //creates username
 const createUsername = () => {
@@ -34,51 +41,75 @@ const createUsername = () => {
   addToDiv(".status-bar", `Signed in as ${username}`, null, "statusbar__current-user");
   document.getElementById("statusbar__current-user").style.cssText =
     "justify-self: flex-end; width: 200px";
+  chatEntry.setAttribute("placeholder", `${username}: `);
 };
 
-const chatEntry = document.querySelector("input.text-entry");
-chatEntry.addEventListener("keydown", () => {
-  socket.emit(chatEntry.value.length > 0 ? "typing" : "end typing");
+/***************
+ * SEND MESSAGE
+ **************/
+chatEntry.addEventListener("keyup", () => {
+  const currentlyTyping = chatEntry.value.length > 0;
+  if (currentlyTyping && typing) return;
+  typing = currentlyTyping;
+  socket.emit(typing ? "typing" : "end typing");
 });
+
+chatEntry.onblur = () => chatEntry.setAttribute("placeholder", `${username}: `);
+chatEntry.onfocus = () => chatEntry.setAttribute("placeholder", ``);
 
 //submits chat message to socket server
 const handleChatSubmit = () => {
-  socket.emit("chat message", { username, message: chatEntry.value });
+  socket.emit("send message", { username, msg: chatEntry.value, id: userId });
   chatEntry.value = "";
 };
 
-//displays message when submitted
-//receiving message
-socket.on("message", msg => {
-  addToDiv(".display-chat", `${msg.username}: ${msg.message}`);
+/**********************
+ * SOCKET LISTENERS
+ **********************/
+
+//RECEIVE CHAT MESSAGE - DISPLAY
+
+socket.on("message", ({ username, msg, id }) => {
+  const chatbox = document.querySelector(".display-chat");
+  const msgContainer = document.createElement("div");
+  msgContainer.classList.add("display-chat__message-container");
+  msgContainer.dataset.id = id;
+  const messageNotRecent = dateFns.differenceInMinutes(new Date(), lastMsgTime) > 3;
+  console.log(dateFns.differenceInMinutes(new Date(), lastMsgTime));
+  const allMsg = [...document.querySelectorAll(".display-chat__message-container")];
+  const notMostRecentSender = allMsg.length && allMsg[allMsg.length - 1].dataset.id !== id;
+  console.log(messageNotRecent, notMostRecentSender, !messageNotRecent && notMostRecentSender);
+  if (notMostRecentSender && messageNotRecent) {
+    const author = document.createElement("div");
+    author.classList.add("display-chat__message-author");
+    author.textContent = username;
+    msgContainer.append(author);
+    msgContainer.style.marginTop = "1rem";
+  }
+  const message = document.createElement("div");
+  message.classList.add("display-chat__message-content");
+  message.textContent = msg;
+  lastMsgTime = new Date();
+
+  msgContainer.append(message);
+  chatbox.append(msgContainer);
 });
 
-//new user has joined
+//NEW USER HAS JOINED
 socket.on("new user", user => {
-  const { username, id } = user;
-  //display new user in userList
-  // addToDiv(".display-users", username, null, id);
-  //announce new user in chat
-  addToDiv(".display-chat", `${username} has joined the chat.`);
-  //send username/id to server
+  addToDiv(".display-chat", `${user.username} has joined the chat.`);
+});
+
+socket.on("personal info", info => {
+  userId = info.id;
+  username = info.username;
 });
 
 socket.on("load user list", activeUsers => {
   //populate other users
   document.querySelectorAll(".userlist div").forEach(user => user.remove());
   for (const userId in activeUsers) {
-    // if (!document.getElementById(userId)) continue;
     addToDiv(".userlist", activeUsers[userId], "userlist__name", userId);
-  }
-});
-
-socket.on("generate current users", usersObj => {
-  const userList = document.querySelector(".userlist");
-  for (const user in usersObj) {
-    const newDiv = document.createElement("div");
-    newDiv.id = user.id;
-    newDiv.textContent = user.username;
-    userList.append(newDiv);
   }
 });
 
