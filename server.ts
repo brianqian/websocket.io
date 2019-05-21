@@ -10,13 +10,14 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static("dist"));
 app.get("/", (req: Request, res: Response) => {
-  res.sendFile(__dirname + "/src/index.html");
+  res.sendFile(__dirname + "/dist/index.html");
 });
 
 const activeUsers = {};
 
 io.on("connection", (socket: any) => {
   //when receiving a message, relay message to other people
+  console.log("USER HAS CONNECTED", socket.id);
   socket.on("send message", (message: any) => {
     // console.log(`message: ${message}, ${dateFns.format(new Date(), "H M s")}`);
     console.log("SENDING", socket.id);
