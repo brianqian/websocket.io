@@ -7,7 +7,8 @@ const dateFns = require("date-fns");
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static("src"));
+
+app.use(express.static((NODE_ENV = "production" ? "dist" : "src")));
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/src/index.html");
 });

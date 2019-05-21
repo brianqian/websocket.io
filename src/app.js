@@ -79,13 +79,13 @@ socket.on("message", ({ username, msg, id }) => {
   const allMsg = [...document.querySelectorAll(".display-chat__message-container")];
   const notMostRecentSender = allMsg.length && allMsg[allMsg.length - 1].dataset.id !== id;
   console.log(messageNotRecent, notMostRecentSender, !messageNotRecent && notMostRecentSender);
-  if (notMostRecentSender && messageNotRecent) {
-    const author = document.createElement("div");
-    author.classList.add("display-chat__message-author");
-    author.textContent = username;
-    msgContainer.append(author);
-    msgContainer.style.marginTop = "1rem";
-  }
+  // if (notMostRecentSender && messageNotRecent) {
+  const author = document.createElement("div");
+  author.classList.add("display-chat__message-author");
+  author.textContent = username;
+  msgContainer.append(author);
+  msgContainer.style.marginTop = "1rem";
+  // }
   const message = document.createElement("div");
   message.classList.add("display-chat__message-content");
   message.textContent = msg;
