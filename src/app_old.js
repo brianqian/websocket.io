@@ -1,16 +1,14 @@
-import "./style.scss";
-import { differenceInMinutes } from "date-fns";
-import * as io from "socket.io-client";
-let username: string = "";
-let userId: string = "";
-let typing: boolean = false;
-let lastMsgTime: Date = new Date(1999);
-const chatEntry: HTMLInputElement = document.querySelector("input.text-entry");
-const socket = io("http://localhost:3000");
+// import "./style.scss";
+
+let username = "";
+let userId = "";
+let typing = false;
+let lastMsgTime = new Date(1999);
+const chatEntry = document.querySelector("input.text-entry");
 
 const forms = document.querySelectorAll("form");
 
-const addToDiv = (divClass: string, message: string, className?: string, id?: string) => {
+const addToDiv = (divClass, message, className, id) => {
   const container = document.querySelector(divClass);
   const newDiv = document.createElement("div");
   if (message !== null) newDiv.textContent = message;
@@ -22,8 +20,8 @@ const addToDiv = (divClass: string, message: string, className?: string, id?: st
 forms.forEach(form =>
   form.addEventListener("submit", e => {
     e.preventDefault();
-    if ((<HTMLElement>e.target).classList.contains("text-entry")) handleChatSubmit();
-    if ((<HTMLElement>e.target).classList.contains("username-form")) createUsername();
+    if (e.target.classList.contains("text-entry")) handleChatSubmit();
+    if (e.target.classList.contains("username-form")) createUsername();
   })
 );
 
@@ -33,10 +31,10 @@ forms.forEach(form =>
 
 //creates username
 const createUsername = () => {
-  const usernameForm = <HTMLInputElement>document.getElementById("enter-username");
+  const usernameForm = document.getElementById("enter-username");
   socket.emit("new user", usernameForm.value);
   username = usernameForm.value;
-  const formOverlay: HTMLElement = document.querySelector(".register-username");
+  const formOverlay = document.querySelector(".register-username");
   formOverlay.style.display = "none";
   //shows username in statusbar
   addToDiv(".status-bar", `Signed in as ${username}`, null, "statusbar__current-user");
@@ -49,7 +47,7 @@ const createUsername = () => {
  * SEND MESSAGE
  **************/
 chatEntry.addEventListener("keyup", () => {
-  const currentlyTyping: boolean = chatEntry.value.length > 0;
+  const currentlyTyping = chatEntry.value.length > 0;
   if (currentlyTyping && typing) return;
   typing = currentlyTyping;
   socket.emit(typing ? "typing" : "end typing");
@@ -70,16 +68,15 @@ const handleChatSubmit = () => {
 
 //RECEIVE CHAT MESSAGE - DISPLAY
 
-socket.on("message", ({ username, msg, id }: Message) => {
+socket.on("message", ({ username, msg, id }) => {
   const chatbox = document.querySelector(".display-chat");
   const msgContainer = document.createElement("div");
   msgContainer.classList.add("display-chat__message-container");
   msgContainer.dataset.id = id;
-  const messageNotRecent: boolean = differenceInMinutes(new Date(), lastMsgTime) > 3;
-  console.log(differenceInMinutes(new Date(), lastMsgTime));
-  const allMsg: any[] = Array.from(document.querySelectorAll(".display-chat__message-container"));
-
-  const notMostRecentSender: boolean = allMsg.length && allMsg[allMsg.length - 1].dataset.id !== id;
+  const messageNotRecent = dateFns.differenceInMinutes(new Date(), lastMsgTime) > 3;
+  console.log(dateFns.differenceInMinutes(new Date(), lastMsgTime));
+  const allMsg = [...document.querySelectorAll(".display-chat__message-container")];
+  const notMostRecentSender = allMsg.length && allMsg[allMsg.length - 1].dataset.id !== id;
   console.log(messageNotRecent, notMostRecentSender, !messageNotRecent && notMostRecentSender);
   // if (notMostRecentSender && messageNotRecent) {
   const author = document.createElement("div");
@@ -98,36 +95,26 @@ socket.on("message", ({ username, msg, id }: Message) => {
 });
 
 //NEW USER HAS JOINED
-socket.on("new user", (user: User) => {
+socket.on("new user", user => {
   addToDiv(".display-chat", `${user.username} has joined the chat.`);
 });
 
-socket.on("personal info", (user: User) => {
-  userId = user.id;
-  username = user.username;
+socket.on("personal info", info => {
+  userId = info.id;
+  username = info.username;
 });
 
-socket.on("load user list", (activeUsers: User) => {
+socket.on("load user list", activeUsers => {
   //populate other users
   document.querySelectorAll(".userlist div").forEach(user => user.remove());
-  for (const id in activeUsers) {
-    addToDiv(".userlist", activeUsers[id], "userlist__name", id);
+  for (const userId in activeUsers) {
+    addToDiv(".userlist", activeUsers[userId], "userlist__name", userId);
   }
 });
 
-socket.on("user disconnected", (id: string) => {
+socket.on("user disconnected", id => {
   //removes user from userList
   document.getElementById(id).remove();
   //announces left the chat
   addToDiv(".display-chat", `${username} has left the chat`);
 });
-
-interface User {
-  username: string;
-  id?: string;
-  [id: string]: string;
-}
-
-interface Message extends User {
-  msg: string;
-}
