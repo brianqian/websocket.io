@@ -1,14 +1,14 @@
-// import "./style.scss";
+import "./style.scss";
 
-let username = "";
-let userId = "";
-let typing = false;
-let lastMsgTime = new Date(1999);
+let username: string = "";
+let userId: string = "";
+let typing: boolean = false;
+let lastMsgTime: Date = new Date(1999);
 const chatEntry = document.querySelector("input.text-entry");
 
 const forms = document.querySelectorAll("form");
 
-const addToDiv = (divClass, message, className, id) => {
+const addToDiv = (divClass: string, message: string, className: string, id: string) => {
   const container = document.querySelector(divClass);
   const newDiv = document.createElement("div");
   if (message !== null) newDiv.textContent = message;
@@ -20,8 +20,8 @@ const addToDiv = (divClass, message, className, id) => {
 forms.forEach(form =>
   form.addEventListener("submit", e => {
     e.preventDefault();
-    if (e.target.classList.contains("text-entry")) handleChatSubmit();
-    if (e.target.classList.contains("username-form")) createUsername();
+    if ((<HTMLElement>e.target).classList.contains("text-entry")) handleChatSubmit();
+    if ((<HTMLElement>e.target).classList.contains("username-form")) createUsername();
   })
 );
 
@@ -31,10 +31,10 @@ forms.forEach(form =>
 
 //creates username
 const createUsername = () => {
-  const usernameForm = document.getElementById("enter-username");
+  const usernameForm = <HTMLInputElement>document.getElementById("enter-username");
   socket.emit("new user", usernameForm.value);
   username = usernameForm.value;
-  const formOverlay = document.querySelector(".register-username");
+  const formOverlay: HTMLElement = document.querySelector(".register-username");
   formOverlay.style.display = "none";
   //shows username in statusbar
   addToDiv(".status-bar", `Signed in as ${username}`, null, "statusbar__current-user");

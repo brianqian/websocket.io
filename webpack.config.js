@@ -1,10 +1,16 @@
 const path = require("path");
 
+const { NODE_ENV = "production" } = process.env;
+
 module.exports = {
-  entry: "./src/app.js",
+  entry: "./src/app.ts",
+  mode: NODE_ENV,
   output: {
     filename: "main.js",
     path: path.resolve(__dirname, "dist"),
+  },
+  resolve: {
+    extensions: [".ts", ".tsx", ".js", ".json"],
   },
   module: {
     rules: [
@@ -13,14 +19,22 @@ module.exports = {
         use: ["style-loader", "css-loader", "sass-loader"],
       },
       {
-        test: /\.js$/,
-        use: {
-          loader: "babel-loader",
-          options: {
-            presets: ["@babel/preset-env"],
+        test: /\.ts$/,
+        use: [
+          {
+            loader: "awesome-typescript-loader",
+            options: {
+              useBabel: true,
+              babelCore: "@babel/core",
+            },
           },
-        },
-        exclude: /(node_modules|bower_components)/,
+        ],
+      },
+      {
+        test: /\.js$/,
+        use: ["source-map-loader"],
+        enforce: "pre",
+        exclude: /node_modules/,
       },
     ],
   },
