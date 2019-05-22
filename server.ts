@@ -1,6 +1,4 @@
 import * as express from "express";
-import * as socketio from "socket.io";
-import { Request, Response } from "express";
 const app = express();
 let http = require("http").Server(app);
 let io = require("socket.io")(http);
@@ -9,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.static("dist"));
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (req, res) => {
   res.sendFile(__dirname + "/dist/index.html");
 });
 
@@ -18,8 +16,7 @@ const activeUsers = {};
 io.on("connection", (socket: any) => {
   //when receiving a message, relay message to other people
   console.log("USER HAS CONNECTED", socket.id);
-  socket.on("send message", (message: any) => {
-    // console.log(`message: ${message}, ${dateFns.format(new Date(), "H M s")}`);
+  socket.on("send message", (message: string) => {
     console.log("SENDING", socket.id);
     io.emit("message", message);
   });

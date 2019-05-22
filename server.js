@@ -15,7 +15,6 @@ io.on("connection", function (socket) {
     //when receiving a message, relay message to other people
     console.log("USER HAS CONNECTED", socket.id);
     socket.on("send message", function (message) {
-        // console.log(`message: ${message}, ${dateFns.format(new Date(), "H M s")}`);
         console.log("SENDING", socket.id);
         io.emit("message", message);
     });
