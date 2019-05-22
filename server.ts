@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/dist/index.html");
 });
 
-const activeUsers = {};
+const activeUsers: any = {};
 
 io.on("connection", (socket: any) => {
   //when receiving a message, relay message to other people
