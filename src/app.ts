@@ -10,12 +10,12 @@ const socket = io("http://localhost:3000");
 
 const forms = document.querySelectorAll("form");
 
-const addToDiv = (divClass: string, message: string, className?: string, id?: string) => {
+const addToDiv = (divClass: string, message: string, className?: string[], id?: string) => {
   const container = document.querySelector(divClass);
   const newDiv = document.createElement("div");
   if (message !== null) newDiv.textContent = message;
   if (id && id !== null) newDiv.id = id;
-  if (className && className !== null) newDiv.classList.add(className);
+  if (className && className !== null) newDiv.classList.add(...className);
   container.append(newDiv);
 };
 
@@ -39,9 +39,7 @@ const createUsername = () => {
   const formOverlay: HTMLElement = document.querySelector(".register-username");
   formOverlay.style.display = "none";
   //shows username in statusbar
-  addToDiv(".status-bar", `Signed in as ${username}`, null, "statusbar__current-user");
-  document.getElementById("statusbar__current-user").style.cssText =
-    "justify-self: flex-end; width: 200px";
+  addToDiv(".status-bar", `Signed in as ${username}`, ["statusbar__current-user"]);
   chatEntry.setAttribute("placeholder", `${username}: `);
 };
 
@@ -76,18 +74,16 @@ socket.on("message", ({ username, msg, id }: Message) => {
   msgContainer.classList.add("display-chat__message-container");
   msgContainer.dataset.id = id;
   const messageNotRecent: boolean = differenceInMinutes(new Date(), lastMsgTime) > 3;
-  console.log(differenceInMinutes(new Date(), lastMsgTime));
   const allMsg: any[] = Array.from(document.querySelectorAll(".display-chat__message-container"));
-
   const notMostRecentSender: boolean = allMsg.length && allMsg[allMsg.length - 1].dataset.id !== id;
-  console.log(messageNotRecent, notMostRecentSender, !messageNotRecent && notMostRecentSender);
-  // if (notMostRecentSender && messageNotRecent) {
-  const author = document.createElement("div");
-  author.classList.add("display-chat__message-author");
-  author.textContent = username;
-  msgContainer.append(author);
-  msgContainer.style.marginTop = "1rem";
-  // }
+  // console.log(messageNotRecent, notMostRecentSender, messageNotRecent || notMostRecentSender);
+  if (notMostRecentSender || messageNotRecent) {
+    const author = document.createElement("div");
+    author.classList.add("display-chat__message-author");
+    author.textContent = username;
+    msgContainer.append(author);
+    msgContainer.style.marginTop = "1rem";
+  }
   const message = document.createElement("div");
   message.classList.add("display-chat__message-content");
   message.textContent = msg;
@@ -99,7 +95,10 @@ socket.on("message", ({ username, msg, id }: Message) => {
 
 //NEW USER HAS JOINED
 socket.on("new user", (user: User) => {
-  addToDiv(".display-chat", `${user.username} has joined the chat.`);
+  addToDiv(".display-chat", `${user.username} has joined the chat.`, [
+    "display-chat__status",
+    "display-chat__status-enter",
+  ]);
 });
 
 socket.on("personal info", (user: User) => {
@@ -111,7 +110,7 @@ socket.on("load user list", (activeUsers: User) => {
   //populate other users
   document.querySelectorAll(".userlist div").forEach(user => user.remove());
   for (const id in activeUsers) {
-    addToDiv(".userlist", activeUsers[id], "userlist__name", id);
+    addToDiv(".userlist", activeUsers[id], ["userlist__name"], id);
   }
 });
 
@@ -119,7 +118,10 @@ socket.on("user disconnected", (id: string) => {
   //removes user from userList
   document.getElementById(id).remove();
   //announces left the chat
-  addToDiv(".display-chat", `${username} has left the chat`);
+  addToDiv(".display-chat", `${username} has left the chat`, [
+    "display-chat__status",
+    "display-chat__status-exit",
+  ]);
 });
 
 interface User {
