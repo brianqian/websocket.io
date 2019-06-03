@@ -33,14 +33,18 @@ io.on("connection", (socket: any) => {
   });
 
   socket.on("typing", () => {
-    io.emit("typing", activeUsers[socket.id]);
+    socket.broadcast.emit("typing", activeUsers[socket.id]);
+  });
+  socket.on("end typing", () => {
+    socket.broadcast.emit("end typing", activeUsers[socket.id]);
   });
 
   //when disconnecting, let other users know.
   socket.on("disconnect", (reason: string) => {
     console.log("user disconnected: " + reason);
     //removes user from userList
-    io.emit("user disconnected", socket.id);
+    const id = socket.id;
+    io.emit("user disconnected", { username: activeUsers[id], id });
     delete activeUsers[socket.id];
   });
 });

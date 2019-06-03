@@ -1,14 +1,17 @@
 import "./style.scss";
 import { differenceInMinutes } from "date-fns";
 import * as io from "socket.io-client";
+import * as path from "path";
 let username: string = "";
 let userId: string = "";
 let typing: boolean = false;
 let lastMsgTime: Date = new Date(1999);
-const chatEntry: HTMLInputElement = document.querySelector("input.text-entry");
-const socket = io("http://localhost:3000");
 
-const forms = document.querySelectorAll("form");
+const chatEntry: HTMLInputElement = document.querySelector("input.text-entry");
+const HOST =
+  process.env.NODE_ENV === "development" ? "http://localhost:3000" : path.resolve(__dirname);
+const socket = io(HOST);
+console.log(process.env.NODE_ENV);
 
 const addToDiv = (divClass: string, message: string, className?: string[], id?: string) => {
   const container = document.querySelector(divClass);
@@ -18,6 +21,8 @@ const addToDiv = (divClass: string, message: string, className?: string[], id?: 
   if (className && className !== null) newDiv.classList.add(...className);
   container.append(newDiv);
 };
+
+const forms = document.querySelectorAll("form");
 
 forms.forEach(form =>
   form.addEventListener("submit", e => {
@@ -46,6 +51,8 @@ const createUsername = () => {
 /***************
  * SEND MESSAGE
  **************/
+
+//SEND TYPING NOTIFICATION
 chatEntry.addEventListener("keyup", () => {
   const currentlyTyping: boolean = chatEntry.value.length > 0;
   if (currentlyTyping && typing) return;
@@ -93,17 +100,21 @@ socket.on("message", ({ username, msg, id }: Message) => {
   chatbox.append(msgContainer);
 });
 
+//USER IS TYPING
+
+socket.on("typing", (username: string) => {
+  console.log(`${username} is typing`);
+});
+socket.on("end typing", (username: string) => {
+  console.log(`${username} is no longer typing`);
+});
+
 //NEW USER HAS JOINED
 socket.on("new user", (user: User) => {
   addToDiv(".display-chat", `${user.username} has joined the chat.`, [
     "display-chat__status",
     "display-chat__status-enter",
   ]);
-});
-
-socket.on("personal info", (user: User) => {
-  userId = user.id;
-  username = user.username;
 });
 
 socket.on("load user list", (activeUsers: User) => {
@@ -114,11 +125,19 @@ socket.on("load user list", (activeUsers: User) => {
   }
 });
 
-socket.on("user disconnected", (id: string) => {
+//SAVE PERSONAL INFO
+socket.on("personal info", (user: User) => {
+  userId = user.id;
+  username = user.username;
+});
+
+//USER DISCONNECT
+
+socket.on("user disconnected", (user: User) => {
   //removes user from userList
-  document.getElementById(id).remove();
+  document.getElementById(user.id).remove();
   //announces left the chat
-  addToDiv(".display-chat", `${username} has left the chat`, [
+  addToDiv(".display-chat", `${user.username} has left the chat`, [
     "display-chat__status",
     "display-chat__status-exit",
   ]);

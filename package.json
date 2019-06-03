@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "start:dev": "nodemon server.js",
-    "build": "webpack",
-    "dev": "concurrently --kill-others-on-fail \"tsc --watch server.ts\" \"webpack --watch\" \"npm:start:dev\""
+    "start:dev": "NODE_ENV=development nodemon server.js",
+    "build": "webpack --mode=production",
+    "dev": "concurrently --kill-others-on-fail \"tsc --watch server.ts\" \"webpack --watch --mode=development\" \"npm:start:dev\""
   },
   "repository": {
     "type": "git",

@@ -29,13 +29,17 @@ io.on("connection", function (socket) {
         console.log(activeUsers);
     });
     socket.on("typing", function () {
-        io.emit("typing", activeUsers[socket.id]);
+        socket.broadcast.emit("typing", activeUsers[socket.id]);
+    });
+    socket.on("end typing", function () {
+        socket.broadcast.emit("end typing", activeUsers[socket.id]);
     });
     //when disconnecting, let other users know.
     socket.on("disconnect", function (reason) {
         console.log("user disconnected: " + reason);
         //removes user from userList
-        io.emit("user disconnected", socket.id);
+        var id = socket.id;
+        io.emit("user disconnected", { username: activeUsers[id], id: id });
         delete activeUsers[socket.id];
     });
 });

@@ -1,8 +1,10 @@
 @import url("https://fonts.googleapis.com/css?family=Lato:400,900&display=swap");
 
 :root {
-  --status-enter-chat: hsla(120, 30%, 35%, 0.7);
-  --status-exit-chat: hsla(0, 40%, 30%, 0.7);
+  --status-enter-chat: hsla(120, 0%, 35%, 0.7);
+  --status-exit-chat: hsla(0, 0%, 35%, 0.7);
+  // --status-enter-chat: hsla(120, 0%, 35%, 0.7);
+  // --status-exit-chat: hsla(0, 40%, 30%, 0.7);
 }
 body,
 html {
@@ -35,8 +37,9 @@ html {
   height: 25px;
   min-height: 25px;
   width: 100%;
-  background-image: linear-gradient(to right, hsl(244, 89%, 35%), hsl(244, 89%, 61%));
-  color: hsl(244, 100%, 86%);
+  // background-image: linear-gradient(to right, hsl(244, 89%, 35%), hsl(244, 89%, 61%));
+  background-color: gray;
+  color: black;
   display: grid;
 }
 
